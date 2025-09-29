@@ -44,18 +44,24 @@ posts = [
     },
 ]
 
+posts_dict = {p['id']: p for p in posts}
+category_dict = {}
+for p in posts:
+    category_dict.setdefault(p['category'], []).append(p)
+
+
 def index(request):
-    return render(request, 'blog/index.html', {'posts': list(reversed(posts))})
+    return render(request, 'blog/index.html', {'posts': posts[::-1]})
+
 
 def post_detail(request, post_id: int):
-    post = next((p for p in posts if p['id'] == post_id), None)
+    post = posts_dict.get(post_id)
     if not post:
         raise Http404('post not found')
     return render(request, 'blog/detail.html', {'post': post})
 
+
 def category_posts(request, category_slug: str):
-    items = [p for p in posts if p['category'] == category_slug]
-    if not items:
-        items = []
+    items = category_dict.get(category_slug, [])
     return render(request, 'blog/category.html',
                   {'category_slug': category_slug, 'posts': items})
